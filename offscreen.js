@@ -452,7 +452,7 @@ async function getFFmpeg() {
     return ffmpegInstance;
 }
 
-async function startDownloadPipeline({ mpdData, captionData, title, mpdUrl }) {
+async function startDownloadPipeline({ mpdData, captionData, captionUrl, title, mpdUrl }) {
     resetProgress();
     updateProgress(0);
     console.log(`[offscreen.js] Starting pipeline for: "${title}"`);
@@ -541,10 +541,24 @@ async function startDownloadPipeline({ mpdData, captionData, title, mpdUrl }) {
 
     // Prepare captions/subtitles if provided
     let hasSubtitles = false;
-    if (captionData && typeof captionData === 'string' && captionData.trim().length > 0) {
-        console.log(`[offscreen.js] Subtitles: captionData found (${captionData.length} chars). Converting to SRT format...`);
+    let finalCaptionData = captionData;
+
+    if (!finalCaptionData && captionUrl) {
+        console.log('[offscreen.js] Subtitles: captionUrl provided. Fetching subtitles from:', captionUrl);
         try {
-            const srt = convertToSrtIfNeeded(captionData);
+            const capRes = await fetch(captionUrl);
+            if (capRes.ok) {
+                finalCaptionData = await capRes.text();
+            }
+        } catch (e) {
+            console.warn('[offscreen.js] Subtitles: Failed to fetch captionUrl:', e);
+        }
+    }
+
+    if (finalCaptionData && typeof finalCaptionData === 'string' && finalCaptionData.trim().length > 0) {
+        console.log(`[offscreen.js] Subtitles: captionData found (${finalCaptionData.length} chars). Converting to SRT format...`);
+        try {
+            const srt = convertToSrtIfNeeded(finalCaptionData);
             if (srt && srt.trim().length > 0) {
                 console.log(`[offscreen.js] Subtitles: Converted to SRT successfully (${srt.length} chars). Writing "subs.srt" to FFmpeg VFS...`);
                 const encoder = new TextEncoder();
@@ -706,6 +720,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.target === 'offscreen' || message.type === 'START_DOWNLOAD' || message.action === 'START_DOWNLOAD' || message.mpdData) {
         const mpdData = message.mpdData || (message.data && message.data.mpdData);
         const captionData = message.captionData || (message.data && message.data.captionData);
+        const captionUrl = message.captionUrl || (message.data && message.data.captionUrl) || '';
         const title = message.title || (message.data && message.data.title) || 'video';
         const mpdUrl = message.mpdUrl || (message.data && message.data.mpdUrl) || '';
 
@@ -718,7 +733,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         console.log('[offscreen.js] Received START_DOWNLOAD for:', title);
         sendResponse({ success: true, status: 'download_started' });
 
-        startDownloadPipeline({ mpdData, captionData, title, mpdUrl })
+        startDownloadPipeline({ mpdData, captionData, captionUrl, title, mpdUrl })
             .then(() => {
                 console.log('[offscreen.js] Pipeline finished successfully for:', title);
             })

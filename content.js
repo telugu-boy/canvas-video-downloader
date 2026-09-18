@@ -108,6 +108,15 @@ function attachDownloadButton() {
                 }
             }
 
+            // Fallback: Find caption url from video tracks if not intercepted
+            if (!captionUrl && !captionData) {
+                const track = document.querySelector('video track[kind="captions"], video track[kind="subtitles"]');
+                if (track && track.src) {
+                    captionUrl = track.src;
+                    console.log('[Canvas Video DL] Found caption URL in DOM:', captionUrl);
+                }
+            }
+
             const title = getTitle();
 
             chrome.runtime.sendMessage({
@@ -116,6 +125,7 @@ function attachDownloadButton() {
                 mpdData: mpdData,
                 mpdUrl: mpdUrl,
                 captionData: captionData,
+                captionUrl: captionUrl,
                 title: title
             }, (response) => {
                 if (chrome.runtime.lastError) {
@@ -134,11 +144,13 @@ function attachDownloadButton() {
 let currentProgress = null;
 
 function updateButtonProgress(btn, percentage) {
-    btn.setAttribute('title', `Downloading: ${percentage}%`);
-    // Clean blue progress bar filling from left to right.
-    // Using a subtle track color rgba(255, 255, 255, 0.2) instead of pure transparent
-    // ensures the button maintains a clean track appearance without wiping out the button style.
-    btn.style.background = `linear-gradient(to right, #1e88e5 ${percentage}%, rgba(255, 255, 255, 0.2) ${percentage}%)`;
+    if (percentage === 100) {
+        btn.removeAttribute('title');
+        btn.style.background = '#4CAF50';
+    } else {
+        btn.setAttribute('title', `Downloading: ${percentage}%`);
+        btn.style.background = `linear-gradient(to right, #1e88e5 ${percentage}%, rgba(255, 255, 255, 0.2) ${percentage}%)`;
+    }
     btn.style.overflow = 'hidden';
     if (!btn.style.borderRadius) {
         btn.style.borderRadius = '4px';
