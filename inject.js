@@ -50,6 +50,40 @@
                 }).catch((err) => {
                     console.error('[Canvas Video DL] Error reading caption text:', err);
                 });
+            } else if (reqUrl.includes('/api/media_management/perspectives/') || resUrl.includes('/api/media_management/perspectives/')) {
+                const clone = response.clone();
+                clone.json().then((json) => {
+                    try {
+                        let mediaData = json?.perspective?.media;
+                        if (mediaData) {
+                            const mediaList = Array.isArray(mediaData) ? mediaData : [mediaData];
+                            for (const media of mediaList) {
+                                if (Array.isArray(media.captions) && media.captions.length > 0) {
+                                    // Use the first available caption URL, or prefer English if you want to be fancy.
+                                    // Here we just grab the first valid URL we find.
+                                    for (const cap of media.captions) {
+                                        if (cap.url) {
+                                            let fullUrl = cap.url;
+                                            if (fullUrl.startsWith('/')) {
+                                                const urlObj = new URL(targetUrl);
+                                                fullUrl = urlObj.origin + fullUrl;
+                                            }
+                                            window.postMessage({
+                                                type: 'CANVAS_CAPTIONS_URL',
+                                                url: fullUrl
+                                            }, '*');
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        console.error('[Canvas Video DL] Error parsing perspectives JSON for captions:', e);
+                    }
+                }).catch((err) => {
+                    console.error('[Canvas Video DL] Error reading perspectives JSON:', err);
+                });
             }
         } catch (err) {
             console.error('[Canvas Video DL] Fetch intercept error:', err);

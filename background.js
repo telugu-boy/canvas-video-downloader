@@ -41,42 +41,31 @@ async function setupOffscreenDocument() {
 // Listen for messages from content scripts or offscreen document
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === 'DOWNLOAD_PROGRESS') {
-        console.log(`[background.js] Download progress: ${message.percentage}%`);
         // Forward progress to active tab(s) so UI can reflect it
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             if (tabs && tabs.length > 0) {
                 tabs.forEach((tab) => {
                     const res = chrome.tabs.sendMessage(tab.id, message, () => {
                         if (chrome.runtime.lastError) {
-                            // Suppress error if content script not listening or tab closed
+                            // Suppress error
                         }
                     });
                     if (res && typeof res.catch === 'function') {
                         res.catch(() => {});
                     }
                 });
-            } else {
-                chrome.tabs.query({ active: true }, (allTabs) => {
-                    if (allTabs && allTabs.length > 0) {
-                        allTabs.forEach((tab) => {
-                            const res = chrome.tabs.sendMessage(tab.id, message, () => {
-                                if (chrome.runtime.lastError) {
-                                    // Suppress error
-                                }
-                            });
-                            if (res && typeof res.catch === 'function') {
-                                res.catch(() => {});
-                            }
-                        });
-                    }
-                });
             }
         });
         return;
     }
-
     if (message.type === 'DOWNLOAD_ERROR') {
         console.error(`[background.js] Download pipeline error received:`, message.error);
+        return;
+    }
+
+    if (message.type === 'CANCEL_DOWNLOAD') {
+        console.log(`[background.js] Forwarding CANCEL_DOWNLOAD to offscreen document`);
+        chrome.runtime.sendMessage({ target: 'offscreen', type: 'CANCEL_DOWNLOAD' }).catch(() => {});
         return;
     }
 
@@ -121,6 +110,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                     mpdData: message.mpdData,
                     mpdUrl: message.mpdUrl,
                     captionData: message.captionData,
+                    captionUrl: message.captionUrl,
                     title: message.title
                 }, (response) => {
                     if (chrome.runtime.lastError) {

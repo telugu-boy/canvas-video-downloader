@@ -18,10 +18,22 @@ window.addEventListener('message', (event) => {
             captionData = event.data.data;
             captionUrl = event.data.url;
             console.log('[Canvas Video DL] Captured Captions data');
+        } else if (event.data.type === 'CANVAS_CAPTIONS_URL') {
+            captionUrl = event.data.url;
+            console.log('[Canvas Video DL] Captured Captions URL from perspective API:', captionUrl);
         } else if (event.data.type === 'DOWNLOAD_PROGRESS') {
+            const buttons = document.querySelectorAll('[data-canvas-dl-btn]');
+            if (buttons.length === 0) return;
+
             const percentage = Math.max(0, Math.min(100, typeof event.data.percentage === 'number' ? event.data.percentage : (parseFloat(event.data.percentage) || 0)));
             currentProgress = percentage;
-            const buttons = document.querySelectorAll('[data-canvas-dl-btn]');
+            
+            const now = Date.now();
+            if (now - lastLogTime >= 1000 || percentage === 100 || percentage === 0) {
+                console.log(`[Canvas Video DL] Download progress: ${percentage}%`);
+                lastLogTime = now;
+            }
+
             buttons.forEach((btn) => {
                 updateButtonProgress(btn, percentage);
                 if (percentage === 100) {
@@ -89,8 +101,28 @@ function attachDownloadButton() {
 
         // Handle download click
         dlBtn.addEventListener('click', async (e) => {
+            if (!e.isTrusted) {
+                console.log('[Canvas Video DL] Ignored untrusted (programmatic) click on download button.');
+                return;
+            }
+            if (currentProgress !== null && currentProgress < 100) {
+                console.log('[Canvas Video DL] Cancelling current download.');
+                chrome.runtime.sendMessage({ type: 'CANCEL_DOWNLOAD' });
+                currentProgress = null;
+                const buttons = document.querySelectorAll('[data-canvas-dl-btn]');
+                buttons.forEach(b => {
+                    b.removeAttribute('title');
+                    b.style.background = '';
+                    b.style.cursor = '';
+                });
+                return;
+            }
             e.preventDefault();
             e.stopPropagation();
+
+            // Instantly show downloading state
+            currentProgress = 0;
+            updateButtonProgress(dlBtn, 0);
 
             // Fallback: If mpdData not yet captured via fetch, try source tag if available
             if (!mpdData) {
@@ -142,14 +174,17 @@ function attachDownloadButton() {
 }
 
 let currentProgress = null;
+let lastLogTime = 0;
 
 function updateButtonProgress(btn, percentage) {
     if (percentage === 100) {
         btn.removeAttribute('title');
         btn.style.background = '#4CAF50';
+        btn.style.cursor = 'pointer';
     } else {
         btn.setAttribute('title', `Downloading: ${percentage}%`);
-        btn.style.background = `linear-gradient(to right, #1e88e5 ${percentage}%, rgba(255, 255, 255, 0.2) ${percentage}%)`;
+        btn.style.background = `linear-gradient(to right, #1e88e5 ${percentage}%, #808080 ${percentage}%)`;
+        btn.style.cursor = 'pointer';
     }
     btn.style.overflow = 'hidden';
     if (!btn.style.borderRadius) {
@@ -160,10 +195,18 @@ function updateButtonProgress(btn, percentage) {
 // Listen for progress updates from background/offscreen
 chrome.runtime.onMessage.addListener((message) => {
     if (message.type === 'DOWNLOAD_PROGRESS') {
-        console.log(`[Canvas Video DL] Download progress: ${message.percentage}%`);
+        const buttons = document.querySelectorAll('[data-canvas-dl-btn]');
+        if (buttons.length === 0) return;
+
         const percentage = Math.max(0, Math.min(100, typeof message.percentage === 'number' ? message.percentage : (parseFloat(message.percentage) || 0)));
         currentProgress = percentage;
-        const buttons = document.querySelectorAll('[data-canvas-dl-btn]');
+        
+        const now = Date.now();
+        if (now - lastLogTime >= 1000 || percentage === 100 || percentage === 0) {
+            console.log(`[Canvas Video DL] Download progress: ${percentage}%`);
+            lastLogTime = now;
+        }
+
         buttons.forEach((btn) => {
             updateButtonProgress(btn, percentage);
             if (percentage === 100) {

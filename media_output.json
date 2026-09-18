@@ -1,0 +1,93 @@
+{
+  "id": 7826,
+  "title": "North Saskatchewan River Valley Tour",
+  "description": "",
+  "duration": 1133.0,
+  "created_at": "2025-09-08T17:55:06Z",
+  "thumbnail_url": "https://yul.nv.instructuremedia.com/api/media/m-5rhm1jrvZMHn5VVP5VqFAT9oiqHynoX8/thumbnail?width=540&height=320",
+  "links": {
+    "tags": "/api/media_management/tags?media_id=7826"
+  },
+  "is_uploaded": true,
+  "mime_type": "application/dash+xml",
+  "sources": [
+    {
+      "mime_type": "application/dash+xml",
+      "url": "https://yul.nv.instructuremedia.com/drm/eyJhbGciOiJFUzUxMiJ9.eyJhdWQiOiJEcm06OkNtYWZDb250cm9sbGVyIiwicGF0aCI6Im9yaWdpbmFscy9vLTVxa2pEUGFEcUg2MkJZeld2Zm9nQ3VaNVFkZGVwZDdpL3RyYW5zY29kaW5ncy90LWR0TU5CNkZpaFcxaXdlaVN6N3ltd2hETkQ0UlJBVWcvbWFuaWZlc3QubXBkIiwiZXhwIjoxNzg5ODQxNjgyLCJqdGkiOiJkM2M0OTNiZjAyN2ViY2Y4YTlkMDhkYmUwY2E0NjZmYSIsIm1ldGFkYXRhIjp7ImNhcHRpb25zIjpbeyJpZCI6ImMtM1hVWVlWMnJlMndZZTdvaDllUWNCQ1FMRDdpb2tIZXQiLCJsYW5ndWFnZSI6ImVuIiwiYXNyIjp0cnVlfV19fQ.AUUhaMmUSvHNI8KThet0jB6oZImuSLOyto68qO8-DPSonE-Dq0jaux_lfIWhTI295ygWHoOj7sHYpkIzo602JDjOABsffTHpfEoqhyDgVpQSKxfIgWVyyT687BQ90ZQ-xiTxUlo911h06KU4GiBTrR595SDV9UdwsV8eQ3G3-jYNfeqb/manifest.mpd",
+      "download_url": "https://yul.nv.instructuremedia.com/drm/eyJhbGciOiJFUzUxMiJ9.eyJhdWQiOiJEcm06OkRvd25sb2FkQ29udHJvbGxlciIsInBhdGgiOiJvcmlnaW5hbHMvby01cWtqRFBhRHFINjJCWXpXdmZvZ0N1WjVRZGRlcGQ3aS9kb3dubG9hZGFibGVzL2QtMldFZGJMWFprdWFxSHFWR2pDQUVzUjJjdHFlY01nZlcubXA0IiwiZXhwIjoxNzg5ODQxNjgyLCJtZXRhZGF0YSI6e319.APS6lEvjxpqp_jQCV_GWzJPCZdId45hEwViqCCWpwhklbnYZTOm6O0roC5HSfW_dXIlgCaA9OyZ3qLrcgu8rrRKNABpiAWiFvz7rT1cU1DfMD3Zrb-Oxq4bIzRFMsVQLOvdhYp84JDuaLurvp6pBZKKGElV8VPcSW1OcExMENJ0iZiPw/download?filename=North+Saskatchewan+River+Valley+Tour",
+      "target": "web",
+      "definition": "standard",
+      "transcoding_guid": "t-dtMNB6FihW1iweiSz7ymwhDND4RRAUg",
+      "status": "succeeded",
+      "metadata": {
+        "is_audio": false,
+        "width": 1280,
+        "height": 720,
+        "aspect_ratio": 1.7777777777777777,
+        "duration": 1133.0,
+        "size": 9305,
+        "bit_rate": 65,
+        "frame_rate": 30.0,
+        "container_format": "dash",
+        "major_brand": null,
+        "video_codec": "h264",
+        "audio_codec": "aac",
+        "silence_ratio": 0.0028271553398058254
+      }
+    }
+  ],
+  "notorious_status": "transcoding_finished",
+  "pandata_tokens": {
+    "resource": "eyJhbGciOiJFUzUxMiJ9.eyJ1c2VyX2lkIjo2MTAzMCwiYWNjb3VudF9pZCI6MTE3MzUsIm5vdG9yaW91c19pZCI6Im0tNXJobTFqcnZaTUhuNVZWUDVWcUZBVDlvaXFIeW5vWDgiLCJlbWJlZF9pZCI6bnVsbCwibWVkaWFfaWQiOjc4MjYsInBlcnNwZWN0aXZlX2lkIjpudWxsLCJjYW5fdmlld19pbnNpZ2h0cyI6ZmFsc2UsImR1cmF0aW9uIjoxMTMzLjB9.ANH1jRwSfgb4kd4yRd_AQS0gVWMA4cMZMUrFfg8T26TXJ766jMHZWOdiftloPdjutY4sm1my0P_vQqGZOM0Bzc4KAb2YmK-UCvjk3IlmoOmAWbbvy3IWJFQqI6vuGdkTiWKR6kmONsAf-cjYc-_SiLKEN_mRzX_xoIrmE4m_ODlLoFB7",
+    "auth": "eyJhbGciOiJFUzUxMiJ9.eyJpc3MiOiJBUkMiLCJleHAiOjE3ODk3Njk2ODIsInN1YiI6NjEwMzAsImF1ZCI6IlBBTkRBVEEifQ.AEdY0-2AN9HkIyQ9T4WywBlVsZLa8nYE7bLzfVv6IKHzONQfGd-Ku4e7MekoTyfqdH34xhRbAvzRNp8r2OL2P7XaAf8EK46m4VrauZEaZbh-ooc0cTR255wEojzHnALB2evsesvGV4MxcBWtFc40Z4JoXieLxagthmAWHXvvP9SBgJah"
+  },
+  "is_external": false,
+  "source": "upload",
+  "last_viewed": "2026-09-18",
+  "archived_at": null,
+  "size": 1478642430,
+  "can_delete": false,
+  "can_manage_captions": false,
+  "captions": [
+    {
+      "id": 6539,
+      "url": "/api/media_management/caption_files/a4f6cda4-fab5-4b63-9ae6-9f92f7e9fb9e-7826",
+      "srclang": "en",
+      "subtitle_format": "srt",
+      "label": "English",
+      "status": "published",
+      "created_at": "2025-09-08T17:55:06Z",
+      "provider": "notorious",
+      "is_empty": false,
+      "number_of_errors": 0
+    }
+  ],
+  "tags": [],
+  "transcodes": [
+    {
+      "status": "finished",
+      "progress": 100.0
+    },
+    {
+      "status": "finished",
+      "progress": 100.0
+    }
+  ],
+  "author": {
+    "id": 22409,
+    "email": "molinaro@ualberta.ca",
+    "full_name": "Darrin Molinaro",
+    "display_name": "Darrin Molinaro",
+    "avatar_url": "https://canvas.ualberta.ca/images/thumbnails/4092377/roRnsl6FnlhB37gSfn2840tSXniLam9abdOu1Zgy",
+    "last_terms": "e383255bf18402b2d58942ad0d0bd8b6",
+    "settings": {
+      "high_contrast": "true",
+      "locale": "en"
+    },
+    "admin": false,
+    "teacher": true,
+    "student": true,
+    "captioning_role_id": null,
+    "subaccount_admin": false
+  }
+}

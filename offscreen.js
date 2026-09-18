@@ -8,6 +8,7 @@ const AUDIO_STORE = 'audio_chunks';
 const MAX_CONCURRENCY = 16;
 
 let ffmpegInstance = null;
+let isCancelled = false;
 
 // ==========================================
 // 1. IndexedDB Helper Functions
@@ -247,6 +248,7 @@ function resetProgress() {
 }
 
 function updateProgress(percentage) {
+    if (isCancelled) return;
     const pct = Math.min(100, Math.max(0, Math.floor(percentage)));
     if (pct !== currentPercentage) {
         currentPercentage = pct;
@@ -287,6 +289,7 @@ async function downloadSegmentsInParallel(segments, storeName, db, maxConcurrenc
 
     async function worker() {
         while (nextIndex < totalCount) {
+            if (isCancelled) throw new Error("Download cancelled");
             const currentIndex = nextIndex++;
             const segment = segments[currentIndex];
 
@@ -453,6 +456,7 @@ async function getFFmpeg() {
 }
 
 async function startDownloadPipeline({ mpdData, captionData, captionUrl, title, mpdUrl }) {
+    isCancelled = false;
     resetProgress();
     updateProgress(0);
     console.log(`[offscreen.js] Starting pipeline for: "${title}"`);
@@ -499,6 +503,7 @@ async function startDownloadPipeline({ mpdData, captionData, captionUrl, title, 
 
     console.log(`[offscreen.js] Writing ${videoSegments.length} video chunks sequentially to FFmpeg VFS ("video.mp4")...`);
     for (let i = 0; i < videoSegments.length; i++) {
+        if (isCancelled) throw new Error("Download cancelled");
         let chunk = await getChunk(db, VIDEO_STORE, i);
         if (!chunk) {
             throw new Error(`Video chunk missing in IndexedDB at index ${i}`);
@@ -519,6 +524,7 @@ async function startDownloadPipeline({ mpdData, captionData, captionUrl, title, 
     if (hasAudio) {
         console.log(`[offscreen.js] Writing ${audioSegments.length} audio chunks sequentially to FFmpeg VFS ("audio.mp4")...`);
         for (let i = 0; i < audioSegments.length; i++) {
+            if (isCancelled) throw new Error("Download cancelled");
             let chunk = await getChunk(db, AUDIO_STORE, i);
             if (!chunk) {
                 throw new Error(`Audio chunk missing in IndexedDB at index ${i}`);
@@ -578,6 +584,7 @@ async function startDownloadPipeline({ mpdData, captionData, captionUrl, title, 
 
     // 5. Run FFmpeg muxing (85% - 95%)
     console.log('[offscreen.js] Starting FFmpeg muxing...');
+    if (isCancelled) throw new Error("Download cancelled");
     let captionsMuxed = false;
 
     const onFfmpegProgress = ({ progress }) => {
@@ -620,6 +627,7 @@ async function startDownloadPipeline({ mpdData, captionData, captionUrl, title, 
 
     // Fallback: If captions muxing failed or was not requested, mux video (+ audio) without subtitles
     if (!captionsMuxed) {
+        if (isCancelled) throw new Error("Download cancelled");
         if (hasSubtitles) {
             console.log('[offscreen.js] Retrying FFmpeg mux without captions so video merge succeeds...');
         } else {
@@ -649,6 +657,8 @@ async function startDownloadPipeline({ mpdData, captionData, captionUrl, title, 
     } catch (_) {}
 
     updateProgress(95);
+
+    if (isCancelled) throw new Error("Download cancelled");
 
     // 6. Read final.mp4 into a Blob and trigger browser download (95% - 100%)
     console.log('[offscreen.js] Reading "final.mp4" from FFmpeg VFS...');
@@ -717,7 +727,21 @@ async function startDownloadPipeline({ mpdData, captionData, captionUrl, title, 
 // ==========================================
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.target === 'offscreen' || message.type === 'START_DOWNLOAD' || message.action === 'START_DOWNLOAD' || message.mpdData) {
+    if (message.type === 'CANCEL_DOWNLOAD') {
+        console.log('[offscreen.js] Received CANCEL_DOWNLOAD');
+        isCancelled = true;
+        if (ffmpegInstance) {
+            try {
+                ffmpegInstance.terminate();
+                ffmpegInstance = null; // force reload next time
+            } catch (e) {
+                console.error('Error terminating ffmpeg:', e);
+            }
+        }
+        return;
+    }
+
+    if (message.type === 'START_DOWNLOAD' || message.action === 'START_DOWNLOAD') {
         const mpdData = message.mpdData || (message.data && message.data.mpdData);
         const captionData = message.captionData || (message.data && message.data.captionData);
         const captionUrl = message.captionUrl || (message.data && message.data.captionUrl) || '';
