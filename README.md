@@ -8,4 +8,3 @@ Steps:
 3. Muxes everything together with `ffmpeg.wasm`
 4. Downloads on native browser
 
-Todo: Add icon for extension
